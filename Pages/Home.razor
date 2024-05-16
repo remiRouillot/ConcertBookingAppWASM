@@ -1,0 +1,30 @@
+﻿@page "/"
+@inject IJSRuntime JS
+@inject DataService service
+@using ReactorBlazorQRCodeScanner
+
+
+<MudMainContent>
+    <QRCodeScanner  Width="100%" />
+</MudMainContent>
+
+@code {
+
+    private QRCodeScannerJsInterop? _qrCodeScannerJsInterop;
+    private Action<string>? _onQrCodeScanAction;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        _onQrCodeScanAction = (code) => OnQrCodeScan(code);
+
+        _qrCodeScannerJsInterop = new QRCodeScannerJsInterop(JS);
+        await _qrCodeScannerJsInterop.Init(_onQrCodeScanAction);
+    }
+
+    private void OnQrCodeScan(string code)
+    {
+        var ticket = service.GetBooking(code);
+        service.ScanTicket(ticket);
+        Console.WriteLine($"OnQrCodeScan {code}");
+    }
+}
